@@ -147,7 +147,6 @@ module MarketingCloudSDK
 				soap_header: new_header,
 				wsdl: wsdl,
 				endpoint: endpoint,
-				wsse_auth: ["*", "*"],
 				raise_errors: false,
 				log: debug,
 				open_timeout:180,
