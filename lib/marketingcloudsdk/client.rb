@@ -77,7 +77,9 @@ module MarketingCloudSDK
 
 	class Client
 	attr_accessor :debug, :access_token, :auth_token, :internal_token, :refresh_token,
-		:id, :secret, :signature, :package_name, :package_folders, :parent_folders, :auth_token_expiration, :request_token_url
+		:id, :secret, :signature, :package_name, :package_folders, :parent_folders, :auth_token_expiration, :request_token_url,
+		:refresh_callback
+
 
 	include MarketingCloudSDK::Soap
 	include MarketingCloudSDK::Rest
@@ -104,8 +106,8 @@ module MarketingCloudSDK
       self.request_token_url = params['request_token_url'] ? params['request_token_url'] : 'https://auth.exacttargetapis.com/v1/requestToken'
 			self.jwt = params['jwt'] if params['jwt']
 			self.refresh_token = params['refresh_token'] if params['refresh_token']
-
 			self.wsdl = params["defaultwsdl"] if params["defaultwsdl"]
+			self.refresh_callback = params['refresh_callback'] if params['refresh_callback']
 		end
 
 		def refresh force=false
@@ -131,6 +133,8 @@ module MarketingCloudSDK
 				# self.internal_token = response['legacyToken']
 				self.auth_token_expiration = Time.new + response['expiresIn']
 				self.refresh_token = response['refreshToken'] if response.has_key?("refreshToken")
+				# If desired, callback with the new data so the user can store it.
+				self.refresh_callback.call(self) if self.refresh_callback
 				return true
 				else
 				return false
