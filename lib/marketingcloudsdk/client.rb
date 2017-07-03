@@ -105,6 +105,8 @@ module MarketingCloudSDK
 
       self.request_token_url = params['request_token_url'] ? params['request_token_url'] : 'https://auth.exacttargetapis.com/v1/requestToken'
 			self.jwt = params['jwt'] if params['jwt']
+			self.access_token = params['access_token'] if params['access_token']
+			self.auth_token_expiration = params['auth_token_expiration'] if params['auth_token_expiration']
 			self.refresh_token = params['refresh_token'] if params['refresh_token']
 			self.wsdl = params["defaultwsdl"] if params["defaultwsdl"]
 			self.refresh_callback = params['refresh_callback'] if params['refresh_callback']
@@ -130,10 +132,9 @@ module MarketingCloudSDK
 				raise "Unable to refresh token: #{response['message']}" unless response.has_key?('accessToken')
 
 				self.access_token = response['accessToken']
-				# self.internal_token = response['legacyToken']
 				self.auth_token_expiration = Time.new + response['expiresIn']
 				self.refresh_token = response['refreshToken'] if response.has_key?("refreshToken")
-				# If desired, callback with the new data so the user can store it.
+				# If desired, callback with the new data so the app can store it.
 				self.refresh_callback.call(self) if self.refresh_callback
 				return true
 				else
