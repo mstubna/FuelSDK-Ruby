@@ -36,7 +36,7 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'savon'
 module MarketingCloudSDK
-	
+
 	class SoapResponse < MarketingCloudSDK::Response
 
 		def continue
@@ -118,6 +118,13 @@ module MarketingCloudSDK
 
 		include MarketingCloudSDK::Targeting
 
+		def new_header
+			{
+				'fueloauth' => access_token,
+				:attributes! => { 'fueloauth' => { 'xmlns' => 'http://exacttarget.com' }}
+			}
+		end
+
 		def header
 			raise 'Require legacy token for soap header' unless internal_token
 			{
@@ -137,7 +144,7 @@ module MarketingCloudSDK
 		def soap_client
 			self.refresh
 			@soap_client = Savon.client(
-				soap_header: header,
+				soap_header: new_header,
 				wsdl: wsdl,
 				endpoint: endpoint,
 				wsse_auth: ["*", "*"],

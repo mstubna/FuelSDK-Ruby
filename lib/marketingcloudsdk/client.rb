@@ -86,17 +86,9 @@ module MarketingCloudSDK
 			raise 'Require app signature to decode JWT' unless self.signature
 			decoded_jwt = JWT.decode(encoded_jwt, self.signature, true)[0]
 
-			if decoded_jwt['request']['claimsVersion'] == 2
-				self.refresh_token = decoded_jwt['request']['rest']['refreshToken']
-				self.auth_token_expiration = Time.at(decoded_jwt['exp'])
-				self.package_name = decoded_jwt['request']['application']['package']
-			else
-				self.auth_token = decoded_jwt['request']['user']['oauthToken']
-				self.internal_token = decoded_jwt['request']['user']['internalOauthToken']
-				self.refresh_token = decoded_jwt['request']['user']['refreshToken']
-				self.auth_token_expiration = Time.new + decoded_jwt['request']['user']['expiresIn']
-				self.package_name = decoded_jwt['request']['application']['package']
-			end
+			self.refresh_token = decoded_jwt['request']['rest']['refreshToken']
+			self.auth_token_expiration = Time.at(decoded_jwt['exp'])
+			self.package_name = decoded_jwt['request']['application']['package']
 		end
 
 		def initialize(params={}, debug=false)
@@ -131,13 +123,12 @@ module MarketingCloudSDK
 				options = Hash.new.tap do |h|
 					h['data'] = payload
 					h['content_type'] = 'application/json'
-					h['params'] = {'legacy' => 1}
 				end
 				response = post(request_token_url, options)
 				raise "Unable to refresh token: #{response['message']}" unless response.has_key?('accessToken')
 
 				self.access_token = response['accessToken']
-				self.internal_token = response['legacyToken']
+				# self.internal_token = response['legacyToken']
 				self.auth_token_expiration = Time.new + response['expiresIn']
 				self.refresh_token = response['refreshToken'] if response.has_key?("refreshToken")
 				return true
