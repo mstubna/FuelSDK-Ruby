@@ -118,18 +118,11 @@ module MarketingCloudSDK
 
 		include MarketingCloudSDK::Targeting
 
-		def new_header
+		def header
+			raise 'Require access_token for soap header' unless access_token
 			{
 				'fueloauth' => access_token,
 				:attributes! => { 'fueloauth' => { 'xmlns' => 'http://exacttarget.com' }}
-			}
-		end
-
-		def header
-			raise 'Require legacy token for soap header' unless internal_token
-			{
-				'oAuth' => {'oAuthToken' => internal_token},
-				:attributes! => { 'oAuth' => { 'xmlns' => 'http://exacttarget.com' }}
 			}
 		end
 
@@ -144,7 +137,7 @@ module MarketingCloudSDK
 		def soap_client
 			self.refresh
 			@soap_client = Savon.client(
-				soap_header: new_header,
+				soap_header: header,
 				wsdl: wsdl,
 				endpoint: endpoint,
 				raise_errors: false,
